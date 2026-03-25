@@ -1,12 +1,11 @@
-// pdf-parse is a CJS module — use require to avoid ESM default-export issues
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse: (buffer: Buffer) => Promise<{ text: string; numpages: number }> = require('pdf-parse');
-
 /**
  * Extract plain text from a PDF buffer.
+ * Lazy-loads pdf-parse to avoid pdfjs-dist DOM initialisation at module load time.
  * Throws if pdf-parse fails (corrupt/non-PDF file).
  */
 export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pdfParse: (buf: Buffer) => Promise<{ text: string }> = require('pdf-parse');
   const result = await pdfParse(buffer);
   return result.text;
 }

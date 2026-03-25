@@ -7,8 +7,15 @@ interface ApiKeyInputProps {
   onChange: (value: string) => void;
 }
 
+// OpenAI keys start with "sk-" and are typically 48+ chars
+function isObviouslyInvalid(key: string) {
+  return key.length > 0 && key.length < 20;
+}
+
 export function ApiKeyInput({ value, onChange }: ApiKeyInputProps) {
   const [showKey, setShowKey] = useState(false);
+  const [touched, setTouched] = useState(false);
+  const invalid = touched && isObviouslyInvalid(value);
 
   return (
     <div className="space-y-1.5">
@@ -26,17 +33,19 @@ export function ApiKeyInput({ value, onChange }: ApiKeyInputProps) {
           type={showKey ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={() => setTouched(true)}
           placeholder="sk-..."
           autoComplete="off"
           spellCheck={false}
+          aria-invalid={invalid}
           className={[
             "w-full px-3 py-2.5 pr-20",
-            "bg-secondary border border-border",
-            "text-foreground font-mono text-sm",
-            "placeholder:text-muted-foreground",
+            "bg-secondary font-mono text-sm",
+            "text-foreground placeholder:text-muted-foreground",
             "outline-none transition-colors",
-            "hover:border-primary/40",
-            "focus:border-primary focus:shadow-[0_0_0_2px_rgba(0,212,255,0.12)]",
+            invalid
+              ? "border border-destructive focus:border-destructive"
+              : "border border-border hover:border-primary/40 focus:border-primary focus:shadow-[0_0_0_2px_rgba(0,212,255,0.12)]",
           ].join(" ")}
         />
         {value.length > 0 && (
@@ -50,9 +59,15 @@ export function ApiKeyInput({ value, onChange }: ApiKeyInputProps) {
           </button>
         )}
       </div>
-      <p className="text-[11px] text-muted-foreground/60 font-mono">
-        Your key is used directly — never stored.
-      </p>
+      {invalid ? (
+        <p data-testid="api-key-error" className="text-[11px] font-mono text-destructive">
+          Key looks too short — OpenAI keys start with sk- and are 48+ characters.
+        </p>
+      ) : (
+        <p className="text-[11px] text-muted-foreground/60 font-mono">
+          Your key is used directly — never stored.
+        </p>
+      )}
     </div>
   );
 }

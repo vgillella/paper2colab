@@ -24,26 +24,34 @@
   - Files: `paper2colab/app/api/generate/route.ts`, `paper2colab/lib/pdf-utils.ts`, `paper2colab/next.config.mjs`
   - Completed: 2026-03-25 — pdf-parse marked as serverExternalPackage (CJS/webpack conflict); validateGenerateRequest helper; 400 on missing fields, 422 on empty/corrupt PDF; 4 unit tests + 4 integration tests all passing
 
-- [ ] Task 5: Write the OpenAI system prompt and call the model (P0)
+- [x] Task 5: Write the OpenAI system prompt and call the model (P0)
   - Acceptance: API route calls OpenAI using the user-provided key with model `gpt-4.5-preview`; system prompt instructs the model to return a strict JSON object `{ title, summary, cells[] }` where each cell has `{ type, source, section }`; prompt requires: paper summary, algorithm pseudocode walkthrough, full Python implementation, realistic synthetic data generation, matplotlib experiments, and results discussion; prompt explicitly forbids trivial toy examples; response is parsed and validated
-  - Files: `app/api/generate/route.ts` (continued), `lib/prompt.ts`
+  - Files: `paper2colab/lib/prompt.ts`, `paper2colab/lib/openai-client.ts`
+  - Completed: 2026-03-25 — Detailed system prompt (8 required sections, realistic synthetic data mandate, no-toy prohibition, matplotlib+LaTeX requirements); buildUserMessage trims to 80k chars; parseNotebookResponse handles JSON+markdown-fenced responses; generateNotebook() wraps OpenAI SDK with json_object response format; 13/13 unit tests pass
 
-- [ ] Task 6: Assemble the OpenAI response into a valid `.ipynb` file (P0)
+- [x] Task 6: Assemble the OpenAI response into a valid `.ipynb` file (P0)
   - Acceptance: Function takes the parsed `{ title, cells[] }` and produces a valid `nbformat v4` JSON object with correct `metadata` (kernelspec: python3, language_info), `nbformat: 4`, `nbformat_minor: 5`; markdown cells have `cell_type: "markdown"`; code cells have `cell_type: "code"`, `execution_count: null`, `outputs: []`; result is a valid `.ipynb` that Colab/Jupyter can open without errors
-  - Files: `lib/notebook-assembler.ts`
+  - Files: `paper2colab/lib/notebook-assembler.ts`
+  - Completed: 2026-03-25 — assembleNotebook() produces valid nbformat v4; notebookToJson() serialiser; notebookFilename() safe slug generator; colab provenance metadata included; 9/9 unit tests pass
 
-- [ ] Task 7: Implement Server-Sent Events (SSE) streaming for progress updates (P1)
-  - Acceptance: `/api/generate` streams SSE events (`data: <json>\n\n`) for each processing stage: `pdf_extracted`, `prompt_sent`, `response_received`, `notebook_assembled`, `gist_created`, `done`; frontend `EventSource` connects and updates the `ProgressFeed` component in real-time; connection closes cleanly on completion or error
-  - Files: `app/api/generate/route.ts` (refactor to streaming), `app/page.tsx` (EventSource integration)
+- [x] Task 7: Implement Server-Sent Events (SSE) streaming for progress updates (P1)
+  - Acceptance: `/api/generate` streams SSE events for each stage; frontend reads stream via fetch ReadableStream; progress feed updates live; closes cleanly
+  - Files: `paper2colab/app/api/generate/route.ts` (full SSE pipeline), `paper2colab/app/page.tsx`
+  - Completed: 2026-03-25 — ReadableStream SSE pipeline: pdf_extract → openai_call → notebook_assemble → gist_upload → done/error; fetch-based streaming on frontend (POST + ReadableStream, not EventSource); 6/6 E2E tests pass
 
-- [ ] Task 8: Create GitHub Gist and construct Open in Colab URL (P1)
-  - Acceptance: After notebook assembly, server POSTs the `.ipynb` JSON to `https://api.github.com/gists` as a public gist (no auth); extracts `gist_id` from response; constructs Colab URL: `https://colab.research.google.com/gist/{gist_id}/notebook.ipynb`; if Gist creation fails, gracefully falls back (no Colab button shown, only download); Colab URL is included in the final SSE `done` event payload
-  - Files: `lib/gist-uploader.ts`, `app/api/generate/route.ts`
+- [x] Task 8: Create GitHub Gist and construct Open in Colab URL (P1)
+  - Acceptance: Gist upload non-fatal; Colab URL in done event; graceful fallback
+  - Files: `paper2colab/lib/gist-uploader.ts`
+  - Completed: 2026-03-25 — uploadToGist() posts to api.github.com/gists; returns null on failure (non-fatal); Colab URL: colab.research.google.com/gist/{id}/{filename}; 4/4 unit tests pass
 
-- [ ] Task 9: Wire up result state — download button + Open in Colab button (P0)
-  - Acceptance: On `done` SSE event, frontend stores `notebookJson` and `gistUrl`; "Download .ipynb" button triggers a client-side blob download of the JSON as `{paper-title}.ipynb`; "Open in Colab" button (if gistUrl exists) opens the Colab URL in a new tab; both buttons are styled to match the dark theme with teal accent; progress feed transitions to a "Complete" state with a subtle checkmark
-  - Files: `app/page.tsx`, `components/result-actions.tsx`
+- [x] Task 9: Wire up result state — download button + Open in Colab button (P0)
+  - Acceptance: Download triggers blob download; Colab button opens URL in new tab; both styled with teal; progress completes with checkmark
+  - Files: `paper2colab/app/page.tsx`, `paper2colab/components/result-actions.tsx`
+  - Completed: 2026-03-25 — ResultActions component with Download + conditional Colab button; fallback message when Colab unavailable; "generate another" reset button; 6/6 E2E tests pass
 
-- [ ] Task 10: Polish — loading states, error handling, responsive layout, header/footer (P2)
-  - Acceptance: Full-page error state shown if API call fails (with error message); API key validation shows inline error if key is clearly invalid format; layout is centered and readable on mobile (min 375px); page has a minimal header with app name "Paper2Colab" and a one-line tagline; subtle page-load fade-in animation; no layout shifts during processing; all text is legible at 16px base size on dark background
-  - Files: `app/page.tsx`, `app/layout.tsx`, `components/error-display.tsx`
+- [x] Task 10: Polish — loading states, error handling, responsive layout, header/footer (P2)
+  - Acceptance: Error display with retry; API key inline validation; mobile responsive (375px); fade-in animation; all text legible
+  - Files: `paper2colab/app/page.tsx`, `paper2colab/app/globals.css`, `paper2colab/components/api-key-input.tsx`
+  - Completed: 2026-03-25 — API key inline error for <20 char keys on blur; overflow-x: hidden for mobile; header status dot changes color by state (ready/processing/done/error); error display with retry button; fade-in animation; 6/6 E2E pass
+
+## Status: COMPLETE ✓

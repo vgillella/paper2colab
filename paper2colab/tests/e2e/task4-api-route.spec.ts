@@ -32,23 +32,21 @@ test.describe('Task 4 — /api/generate route (PDF extraction)', () => {
     expect(body.error).toMatch(/pdf/i);
   });
 
-  test('03 — returns 200 with charCount when valid PDF + apiKey provided', async ({ request }) => {
+  test('03 — returns 200 SSE stream when valid PDF + apiKey provided', async ({ request }) => {
     const res = await request.post('/api/generate', {
       multipart: {
         apiKey: 'sk-test-key-1234',
-        pdf: {
-          name: 'paper.pdf',
-          mimeType: 'application/pdf',
-          buffer: MINIMAL_PDF,
-        },
+        pdf: { name: 'paper.pdf', mimeType: 'application/pdf', buffer: MINIMAL_PDF },
       },
     });
-    // Either 200 (text extracted) or 422 (minimal PDF has no real text content)
-    // Both are acceptable — what matters is NOT 400/500
-    expect([200, 422]).toContain(res.status());
-    const body = await res.json();
-    const hasValidShape = 'ok' in body || 'error' in body;
-    expect(hasValidShape).toBe(true);
+    // Route now streams SSE — success is 200 with text/event-stream content type
+    // (PDF may be too small to extract text → first SSE event may be an error, still 200)
+    expect(res.status()).toBe(200);
+    const contentType = res.headers()['content-type'];
+    expect(contentType).toContain('text/event-stream');
+    // Body should start with "data:"
+    const text = await res.text();
+    expect(text).toMatch(/^data:/);
   });
 
   test('04 — returns 400 when form data is completely empty', async ({ request }) => {
