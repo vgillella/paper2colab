@@ -14,9 +14,10 @@
   - Files: `paper2colab/app/page.tsx`, `paper2colab/components/api-key-input.tsx`, `paper2colab/components/pdf-upload-zone.tsx`
   - Completed: 2026-03-25 — Full ARC-AGI layout: header with grid logo + pulsing status dot, API key input with show/hide toggle, drag-and-drop PDF upload zone showing filename on selection, submit controlled by both fields; 8/8 E2E tests pass
 
-- [ ] Task 3: Build the live progress display component (P0)
+- [x] Task 3: Build the live progress display component (P0)
   - Acceptance: Component accepts a list of status strings and renders them as a stacked feed with typewriter animation on the latest line; completed lines are dimmed; component is shown only after submission; includes a pulsing indicator while processing; messages like "Extracting PDF text...", "Analyzing paper structure...", "Generating algorithm cells...", "Assembling notebook...", "Done."
-  - Files: `components/progress-feed.tsx`
+  - Files: `paper2colab/components/progress-feed.tsx`, `paper2colab/app/test-progress/page.tsx`
+  - Completed: 2026-03-25 — Typewriter animation via useTypewriter hook; done=dimmed+teal-checkmark, active=teal-arrow+blinking-cursor+full-opacity, pending=greyed; pulsing indicator in header; done state shows checkmark; 5/5 E2E pass
 
 - [ ] Task 4: Create the PDF text extraction API route (P0)
   - Acceptance: `POST /api/generate` accepts `multipart/form-data` with `pdf` (file) and `apiKey` (string); extracts full text from the PDF using `pdf-parse`; returns 400 if either field is missing; logs extracted character count
