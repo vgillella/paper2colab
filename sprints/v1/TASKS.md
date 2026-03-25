@@ -19,9 +19,10 @@
   - Files: `paper2colab/components/progress-feed.tsx`, `paper2colab/app/test-progress/page.tsx`
   - Completed: 2026-03-25 — Typewriter animation via useTypewriter hook; done=dimmed+teal-checkmark, active=teal-arrow+blinking-cursor+full-opacity, pending=greyed; pulsing indicator in header; done state shows checkmark; 5/5 E2E pass
 
-- [ ] Task 4: Create the PDF text extraction API route (P0)
+- [x] Task 4: Create the PDF text extraction API route (P0)
   - Acceptance: `POST /api/generate` accepts `multipart/form-data` with `pdf` (file) and `apiKey` (string); extracts full text from the PDF using `pdf-parse`; returns 400 if either field is missing; logs extracted character count
-  - Files: `app/api/generate/route.ts`, install `pdf-parse` + `@types/pdf-parse`
+  - Files: `paper2colab/app/api/generate/route.ts`, `paper2colab/lib/pdf-utils.ts`, `paper2colab/next.config.mjs`
+  - Completed: 2026-03-25 — pdf-parse marked as serverExternalPackage (CJS/webpack conflict); validateGenerateRequest helper; 400 on missing fields, 422 on empty/corrupt PDF; 4 unit tests + 4 integration tests all passing
 
 - [ ] Task 5: Write the OpenAI system prompt and call the model (P0)
   - Acceptance: API route calls OpenAI using the user-provided key with model `gpt-4.5-preview`; system prompt instructs the model to return a strict JSON object `{ title, summary, cells[] }` where each cell has `{ type, source, section }`; prompt requires: paper summary, algorithm pseudocode walkthrough, full Python implementation, realistic synthetic data generation, matplotlib experiments, and results discussion; prompt explicitly forbids trivial toy examples; response is parsed and validated
