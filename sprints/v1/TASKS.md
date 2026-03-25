@@ -9,9 +9,10 @@
   - Files: `paper2colab/package.json`, `paper2colab/app/globals.css`, `paper2colab/app/layout.tsx`, `paper2colab/components.json`, `paper2colab/playwright.config.ts`
   - Completed: 2026-03-25 — Scaffolded Next.js 14 app in `paper2colab/` subdir; upgraded to Tailwind v4 + @tailwindcss/postcss; shadcn/ui v4 init with Button + Input; ARC-AGI dark theme (oklch near-black bg, teal accent, off-white text, 0rem radius); Inter + JetBrains Mono fonts; Playwright E2E tests (3/3 pass); npm audit shows 4 high vulns in next@14 core (no v14 patch available — defer upgrade to pre-deploy task)
 
-- [ ] Task 2: Build the main page UI — API key input + PDF upload zone (P0)
+- [x] Task 2: Build the main page UI — API key input + PDF upload zone (P0)
   - Acceptance: Page renders with ARC-AGI-inspired dark theme; API key input field (password type) with label; PDF drag-and-drop upload zone with click-to-browse fallback; "Generate Notebook" submit button (disabled until both fields filled); all styled with sharp borders, teal accent, Inter/monospace fonts
-  - Files: `app/page.tsx`, `components/api-key-input.tsx`, `components/pdf-upload-zone.tsx`
+  - Files: `paper2colab/app/page.tsx`, `paper2colab/components/api-key-input.tsx`, `paper2colab/components/pdf-upload-zone.tsx`
+  - Completed: 2026-03-25 — Full ARC-AGI layout: header with grid logo + pulsing status dot, API key input with show/hide toggle, drag-and-drop PDF upload zone showing filename on selection, submit controlled by both fields; 8/8 E2E tests pass
 
 - [ ] Task 3: Build the live progress display component (P0)
   - Acceptance: Component accepts a list of status strings and renders them as a stacked feed with typewriter animation on the latest line; completed lines are dimmed; component is shown only after submission; includes a pulsing indicator while processing; messages like "Extracting PDF text...", "Analyzing paper structure...", "Generating algorithm cells...", "Assembling notebook...", "Done."
