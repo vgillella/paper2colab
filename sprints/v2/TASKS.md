@@ -11,12 +11,13 @@
     (rename `serverComponentsExternalPackages` → `serverExternalPackages` if API changed)
   - Completed: 2026-03-26 — Upgraded to next@15.5.14 + eslint-config-next@15.5.14; moved `serverComponentsExternalPackages` → top-level `serverExternalPackages`; fixed unused param lint warning in notebook-assembler.ts; fixed vitest config to exclude Playwright spec files (added `include: ['tests/unit/**/*.test.ts']`); 31/31 unit + 32/32 E2E pass; npm audit: 0 vulnerabilities; semgrep: 0 findings
 
-- [ ] Task 2: Add HTTP security headers in next.config.mjs (P0)
+- [x] Task 2: Add HTTP security headers in next.config.mjs (P0)
   - Acceptance: `curl -I http://localhost:3000` returns all 5 headers: `X-Frame-Options: DENY`,
     `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`,
     `Permissions-Policy: camera=(), microphone=(), geolocation=()`,
     `Content-Security-Policy` with `default-src 'self'`; Playwright test verifies headers on `/`
   - Files: `paper2colab/next.config.mjs`, `paper2colab/tests/e2e/task2v2-security-headers.spec.ts`
+  - Completed: 2026-03-26 — Added async headers() to next.config.mjs for all routes: X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy no-referrer, Permissions-Policy (camera/mic/geo blocked), CSP with default-src 'self' + Google Fonts/OpenAI/GitHub allowlists; 7/7 E2E pass; full regression 31 unit + 39 E2E green
 
 - [ ] Task 3: Add PDF file size limit (20 MB) and server-side API key format validation (P0)
   - Acceptance: POST with PDF > 20 MB returns 413 `{ error: "PDF must be under 20 MB" }`;
