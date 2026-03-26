@@ -54,7 +54,7 @@ function newCellId(): string {
   return `cell-${String(cellIdCounter).padStart(4, '0')}`;
 }
 
-function buildCell(cell: NotebookCell, index: number): JupyterCell {
+function buildCell(cell: NotebookCell, _index: number): JupyterCell {
   const id = newCellId();
   const metadata: Record<string, unknown> = cell.section ? { section: cell.section } : {};
 
