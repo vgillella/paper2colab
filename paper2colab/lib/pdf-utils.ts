@@ -1,6 +1,20 @@
 /** Maximum allowed PDF size: 20 MB */
 export const PDF_MAX_BYTES = 20 * 1024 * 1024;
 
+/**
+ * Strip dangerous characters from extracted PDF text:
+ * - C0 control chars: \x00–\x08, \x0B, \x0C, \x0E–\x1F (null, SOH…BS, VT, FF, SO…US)
+ * - Unicode direction overrides and non-characters: \u202E, \uFFFE, \uFFFF
+ * - Prompt injection delimiters: "=== PAPER TEXT START ===" / "=== PAPER TEXT END ==="
+ * Preserves safe whitespace: \t (\x09), \n (\x0A), \r (\x0D).
+ */
+export function sanitizePdfText(text: string): string {
+  return text
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\u202E\uFFFE\uFFFF]/g, '')
+    .replace(/=== PAPER TEXT START ===/g, '')
+    .replace(/=== PAPER TEXT END ===/g, '');
+}
+
 /** Regex for a valid OpenAI API key: sk- followed by 20–200 alphanumeric/dash/underscore chars */
 const API_KEY_RE = /^sk-[A-Za-z0-9\-_]{20,200}$/;
 

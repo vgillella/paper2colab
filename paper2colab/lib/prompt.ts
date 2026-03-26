@@ -1,3 +1,5 @@
+import { sanitizePdfText } from '@/lib/pdf-utils';
+
 export interface NotebookCell {
   type: 'markdown' | 'code';
   source: string;
@@ -114,7 +116,7 @@ CRITICAL: The synthetic data MUST be realistic and non-trivial. Specifically:
 const MAX_TEXT_CHARS = 80_000; // ~20k tokens — well within gpt-4.5 context
 
 export function buildUserMessage(pdfText: string): string {
-  const trimmed = pdfText.slice(0, MAX_TEXT_CHARS);
+  const trimmed = sanitizePdfText(pdfText).slice(0, MAX_TEXT_CHARS);
   const wasTrimmed = pdfText.length > MAX_TEXT_CHARS;
 
   return [

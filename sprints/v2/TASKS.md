@@ -28,13 +28,14 @@
     `paper2colab/tests/unit/input-validation.test.ts`
   - Completed: 2026-03-26 — Added PDF_MAX_BYTES constant (20 MB) and API_KEY_RE regex to pdf-utils.ts; validateGenerateRequest now returns ValidationError[] with {field, code, message}; route.ts returns 413 for TOO_LARGE, 400 for INVALID_FORMAT/MISSING before SSE stream opens; updated pdf-extraction.test.ts to new API; 44/44 unit tests pass; semgrep: 0 findings; npm audit: 0 vulnerabilities
 
-- [ ] Task 4: Sanitise PDF text — strip control characters and escape prompt delimiters (P0)
+- [x] Task 4: Sanitise PDF text — strip control characters and escape prompt delimiters (P0)
   - Acceptance: `sanitizePdfText()` function strips null bytes, C0 control chars (`\x00-\x08`,
     `\x0B`, `\x0C`, `\x0E-\x1F`), Unicode overrides (`\u202E`, `\uFFFE`, `\uFFFF`), and
     removes any occurrence of `=== PAPER TEXT START ===` / `=== PAPER TEXT END ===` from the
     extracted text; unit tests cover all strip cases; function is called in `buildUserMessage()`
   - Files: `paper2colab/lib/pdf-utils.ts`, `paper2colab/lib/prompt.ts`,
     `paper2colab/tests/unit/pdf-sanitization.test.ts`
+  - Completed: 2026-03-26 — Added sanitizePdfText() to pdf-utils.ts with single regex for C0 control chars + Unicode overrides + two replace calls for prompt delimiters; wired into buildUserMessage() via static import; 16 new unit tests; 60/60 total pass; semgrep clean
 
 - [ ] Task 5: Sanitise error messages sent to client (P0)
   - Acceptance: Unclassified errors from OpenAI show a generic
