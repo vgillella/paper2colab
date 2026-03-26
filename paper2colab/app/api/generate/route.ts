@@ -45,9 +45,11 @@ export async function POST(req: NextRequest) {
 
   const errors = validateGenerateRequest(apiKey, pdfBuffer);
   if (errors.length > 0) {
+    const first = errors[0];
+    const status = first.code === 'TOO_LARGE' ? 413 : 400;
     return new Response(
-      JSON.stringify({ error: `Missing required fields: ${errors.join(', ')}` }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: first.message }),
+      { status, headers: { 'Content-Type': 'application/json' } }
     );
   }
 

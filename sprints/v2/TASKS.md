@@ -19,13 +19,14 @@
   - Files: `paper2colab/next.config.mjs`, `paper2colab/tests/e2e/task2v2-security-headers.spec.ts`
   - Completed: 2026-03-26 — Added async headers() to next.config.mjs for all routes: X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy no-referrer, Permissions-Policy (camera/mic/geo blocked), CSP with default-src 'self' + Google Fonts/OpenAI/GitHub allowlists; 7/7 E2E pass; full regression 31 unit + 39 E2E green
 
-- [ ] Task 3: Add PDF file size limit (20 MB) and server-side API key format validation (P0)
+- [x] Task 3: Add PDF file size limit (20 MB) and server-side API key format validation (P0)
   - Acceptance: POST with PDF > 20 MB returns 413 `{ error: "PDF must be under 20 MB" }`;
     POST with malformed API key (not matching `/^sk-[A-Za-z0-9\-_]{20,200}$/`) returns 400
     `{ error: "Invalid API key format" }`; both checks happen before the SSE stream opens;
     unit tests cover both rejection paths
   - Files: `paper2colab/app/api/generate/route.ts`, `paper2colab/lib/pdf-utils.ts`,
     `paper2colab/tests/unit/input-validation.test.ts`
+  - Completed: 2026-03-26 — Added PDF_MAX_BYTES constant (20 MB) and API_KEY_RE regex to pdf-utils.ts; validateGenerateRequest now returns ValidationError[] with {field, code, message}; route.ts returns 413 for TOO_LARGE, 400 for INVALID_FORMAT/MISSING before SSE stream opens; updated pdf-extraction.test.ts to new API; 44/44 unit tests pass; semgrep: 0 findings; npm audit: 0 vulnerabilities
 
 - [ ] Task 4: Sanitise PDF text — strip control characters and escape prompt delimiters (P0)
   - Acceptance: `sanitizePdfText()` function strips null bytes, C0 control chars (`\x00-\x08`,
