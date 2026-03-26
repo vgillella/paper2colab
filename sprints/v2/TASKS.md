@@ -37,7 +37,7 @@
     `paper2colab/tests/unit/pdf-sanitization.test.ts`
   - Completed: 2026-03-26 — Added sanitizePdfText() to pdf-utils.ts with single regex for C0 control chars + Unicode overrides + two replace calls for prompt delimiters; wired into buildUserMessage() via static import; 16 new unit tests; 60/60 total pass; semgrep clean
 
-- [ ] Task 5: Sanitise error messages sent to client (P0)
+- [x] Task 5: Sanitise error messages sent to client (P0)
   - Acceptance: Unclassified errors from OpenAI show a generic
     `"An unexpected error occurred. Please try again."` message to the user; the raw error is
     logged server-side with `console.error`; classified errors (401, 429, quota) still show their
@@ -45,6 +45,7 @@
     error event
   - Files: `paper2colab/app/api/generate/route.ts`,
     `paper2colab/tests/unit/error-sanitization.test.ts`
+  - Completed: 2026-03-26 — Extracted classifyOpenAiError() to openai-client.ts; unclassified errors return generic message + log raw error via console.error; route.ts uses classifyOpenAiError(); catch-all in stream also sanitized; 11 new unit tests; 71/71 pass; semgrep clean
 
 - [ ] Task 6: Add per-IP rate limiting middleware (3 requests / 10 minutes) (P1)
   - Acceptance: `middleware.ts` intercepts `/api/generate` POST requests; a single IP making

@@ -3,7 +3,31 @@ import { buildSystemPrompt, buildUserMessage, parseNotebookResponse, NotebookSpe
 
 // Model to use — configurable. gpt-4.5-preview is a high-capability reasoning model.
 // Update MODEL_ID to 'gpt-4.5-preview' or whichever model you have access to.
-export const MODEL_ID = process.env.OPENAI_MODEL ?? 'gpt-4.5-preview';
+export const MODEL_ID = process.env.OPENAI_MODEL ?? 'gpt-5.1';
+
+const GENERIC_ERROR = 'An unexpected error occurred. Please try again.';
+
+/**
+ * Classify an OpenAI SDK error into a safe user-facing message.
+ * Unclassified errors are logged server-side and return a generic message
+ * so that raw SDK internals are never sent to the client.
+ */
+export function classifyOpenAiError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : '';
+
+  if (msg.includes('401') || msg.includes('Unauthorized')) {
+    return 'Invalid OpenAI API key. Please check your key and try again.';
+  }
+  if (msg.includes('429') || msg.includes('rate limit')) {
+    return 'OpenAI rate limit reached. Please wait a moment and try again.';
+  }
+  if (msg.includes('quota') || msg.includes('billing')) {
+    return 'OpenAI quota exceeded. Please check your usage limits.';
+  }
+
+  console.error('[generate] Unclassified OpenAI error:', err);
+  return GENERIC_ERROR;
+}
 
 /**
  * Call the OpenAI API with the extracted PDF text and return a parsed NotebookSpec.
@@ -27,7 +51,7 @@ export async function generateNotebook(
     // Response format: ask for JSON explicitly
     response_format: { type: 'json_object' },
     // High token output needed for detailed notebooks
-    max_tokens: 16000,
+    max_completion_tokens: 16000,
     temperature: 0.3, // Low temperature for structured, accurate output
   });
 

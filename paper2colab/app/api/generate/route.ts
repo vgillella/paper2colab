@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { extractTextFromPdf, validateGenerateRequest } from '@/lib/pdf-utils';
-import { generateNotebook } from '@/lib/openai-client';
+import { generateNotebook, classifyOpenAiError } from '@/lib/openai-client';
 import { assembleNotebook, notebookToJson, notebookFilename } from '@/lib/notebook-assembler';
 import { uploadToGist } from '@/lib/gist-uploader';
 
@@ -87,17 +87,7 @@ export async function POST(req: NextRequest) {
         try {
           spec = await generateNotebook(apiKey, pdfText, progress);
         } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : String(err);
-          // Surface OpenAI-specific errors clearly
-          if (msg.includes('401') || msg.includes('Unauthorized')) {
-            send({ type: 'error', message: 'Invalid OpenAI API key. Please check your key and try again.' });
-          } else if (msg.includes('429') || msg.includes('rate limit')) {
-            send({ type: 'error', message: 'OpenAI rate limit reached. Please wait a moment and try again.' });
-          } else if (msg.includes('quota') || msg.includes('billing')) {
-            send({ type: 'error', message: 'OpenAI quota exceeded. Please check your usage limits.' });
-          } else {
-            send({ type: 'error', message: `AI generation failed: ${msg}` });
-          }
+          send({ type: 'error', message: classifyOpenAiError(err) });
           controller.close();
           return;
         }
@@ -128,8 +118,8 @@ export async function POST(req: NextRequest) {
         });
         controller.close();
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Unexpected server error';
-        send({ type: 'error', message: msg });
+        console.error('[generate] Unexpected error:', err);
+        send({ type: 'error', message: 'An unexpected error occurred. Please try again.' });
         controller.close();
       }
     },
