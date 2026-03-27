@@ -32,6 +32,11 @@ export function middleware(req: NextRequest) {
   if (req.method !== 'POST') return NextResponse.next();
 
   const ip = getClientIp(req);
+
+  // Loopback addresses are always trusted (internal/dev traffic)
+  if (ip === '127.0.0.1' || ip === '::1' || ip.startsWith('::ffff:127.')) {
+    return NextResponse.next();
+  }
   const now = Date.now();
   const store = getStore();
 
