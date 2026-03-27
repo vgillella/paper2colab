@@ -55,7 +55,7 @@
   - Files: `paper2colab/middleware.ts`, `paper2colab/tests/e2e/task6v2-rate-limiting.spec.ts`
   - Completed: 2026-03-26 — Created middleware.ts with in-memory sliding window (3 req/10 min per IP); reads x-forwarded-for; returns 429 + Retry-After header; updated task4-api-route.spec.ts to use valid API key format; 3/3 E2E pass; 71 unit pass; semgrep clean
 
-- [ ] Task 7: Default GitHub Gist to secret + add UI disclosure warning (P1)
+- [x] Task 7: Default GitHub Gist to secret + add UI disclosure warning (P1)
   - Acceptance: `uploadToGist()` sets `public: false` (secret/unlisted gist); the main form
     shows a one-line disclosure below the submit button: "Your notebook will be uploaded as an
     unlisted GitHub Gist to enable the Open in Colab link"; Playwright test verifies the
@@ -63,6 +63,7 @@
     `public: false`
   - Files: `paper2colab/lib/gist-uploader.ts`, `paper2colab/app/page.tsx`,
     `paper2colab/tests/unit/gist-uploader.test.ts`, `paper2colab/tests/e2e/task7v2-gist-disclosure.spec.ts`
+  - Completed: 2026-03-26 — gist-uploader.ts: public:true → public:false; page.tsx: disclosure paragraph with data-testid="gist-disclosure" below submit button; unit test updated; 2/2 E2E pass; 71 unit pass; semgrep clean
 
 - [ ] Task 8: Stream OpenAI response token-by-token via SSE (P1)
   - Acceptance: `generateNotebook()` uses `stream: true`; each token delta is forwarded as a

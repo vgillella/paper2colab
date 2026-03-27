@@ -62,7 +62,7 @@ describe('uploadToGist()', () => {
     );
 
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.public).toBe(true);
+    expect(body.public).toBe(false);
     expect(body.files).toHaveProperty(FAKE_FILENAME);
     expect(body.files[FAKE_FILENAME].content).toBe(FAKE_NOTEBOOK);
   });

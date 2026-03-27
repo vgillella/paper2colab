@@ -221,6 +221,13 @@ export default function Home() {
                 >
                   {canSubmit ? "Generate Notebook →" : "Generate Notebook"}
                 </button>
+
+                <p
+                  data-testid="gist-disclosure"
+                  className="text-center text-[11px] font-mono text-muted-foreground/60"
+                >
+                  Your notebook will be uploaded as an unlisted GitHub Gist to enable the Open in Colab link.
+                </p>
               </form>
 
               <p className="text-center text-[11px] font-mono text-muted-foreground/50">
