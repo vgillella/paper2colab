@@ -11,6 +11,7 @@ export interface ProgressMessage {
 interface ProgressFeedProps {
   messages: ProgressMessage[];
   isDone: boolean;
+  tokenCharCount?: number;
 }
 
 // Typewriter hook — reveals text char by char for the active message
@@ -82,7 +83,7 @@ function MessageRow({ msg }: { msg: ProgressMessage }) {
   );
 }
 
-export function ProgressFeed({ messages, isDone }: ProgressFeedProps) {
+export function ProgressFeed({ messages, isDone, tokenCharCount = 0 }: ProgressFeedProps) {
   return (
     <div
       data-testid="progress-feed"
@@ -121,6 +122,18 @@ export function ProgressFeed({ messages, isDone }: ProgressFeedProps) {
           <MessageRow key={msg.id} msg={msg} />
         ))}
       </div>
+
+      {/* Streaming token count — visible when tokens are arriving */}
+      {tokenCharCount > 0 && (
+        <div
+          data-testid="token-char-count"
+          className="mt-3 pt-3 border-t border-border overflow-y-auto max-h-20"
+        >
+          <p className="font-mono text-xs text-primary animate-pulse">
+            Writing notebook... ({tokenCharCount.toLocaleString()} chars)
+          </p>
+        </div>
+      )}
     </div>
   );
 }

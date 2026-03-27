@@ -18,9 +18,10 @@ interface Result {
 
 // ── SSE event shapes from the server ──────────────────────────────────────
 interface SseProgressEvent { type: "progress"; message: string }
+interface SseTokenEvent { type: "token"; delta: string }
 interface SseDoneEvent { type: "done"; notebookJson: string; filename: string; colabUrl: string | null; title: string }
 interface SseErrorEvent { type: "error"; message: string }
-type SseEvent = SseProgressEvent | SseDoneEvent | SseErrorEvent;
+type SseEvent = SseProgressEvent | SseTokenEvent | SseDoneEvent | SseErrorEvent;
 
 let msgCounter = 0;
 function mkMsg(text: string, status: ProgressMessage["status"]): ProgressMessage {
@@ -33,6 +34,7 @@ export default function Home() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [appState, setAppState] = useState<AppState>("idle");
   const [messages, setMessages] = useState<ProgressMessage[]>([]);
+  const [tokenCharCount, setTokenCharCount] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -54,6 +56,7 @@ export default function Home() {
     msgCounter = 0;
     setMessages([mkMsg("Starting...", "active")]);
     setAppState("processing");
+    setTokenCharCount(0);
     setResult(null);
     setErrorMsg(null);
 
@@ -104,6 +107,8 @@ export default function Home() {
 
           if (event.type === "progress") {
             pushMessage(event.message);
+          } else if (event.type === "token") {
+            setTokenCharCount((n) => n + event.delta.length);
           } else if (event.type === "done") {
             setMessages(prev =>
               prev.map(m => m.status === "active" ? { ...m, status: "done" as const } : m)
@@ -239,7 +244,7 @@ export default function Home() {
           {/* Progress feed — shown while processing or on error */}
           {(isProcessing || isError || isDone) && messages.length > 0 && (
             <div data-testid="progress-feed-wrapper">
-              <ProgressFeed messages={messages} isDone={isDone} />
+              <ProgressFeed messages={messages} isDone={isDone} tokenCharCount={tokenCharCount} />
             </div>
           )}
 

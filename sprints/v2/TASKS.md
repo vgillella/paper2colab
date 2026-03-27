@@ -75,7 +75,7 @@
     `paper2colab/tests/unit/openai-streaming.test.ts`
   - Completed: 2026-03-26 — generateNotebook() uses stream:true and async-iterates over chunks; each non-null delta forwarded via onToken(); rawJson accumulated then parsed; DI parameter _client added for testability; route.ts sends {type:"token",delta} SSE events; 6 new unit tests; 77/77 pass; semgrep clean
 
-- [ ] Task 9: Update ProgressFeed to display streaming token output (P1)
+- [x] Task 9: Update ProgressFeed to display streaming token output (P1)
   - Acceptance: When `{ type: "token" }` SSE events arrive, the progress feed shows a live
     "Writing notebook..." message with accumulated character count (e.g.
     `Writing notebook... (1,240 chars)`); the typewriter animation on earlier messages is
@@ -83,6 +83,7 @@
     token stream and verifies the character count updates in the UI
   - Files: `paper2colab/app/page.tsx`, `paper2colab/components/progress-feed.tsx`,
     `paper2colab/tests/e2e/task9v2-streaming-ui.spec.ts`
+  - Completed: 2026-03-27 — page.tsx: tokenCharCount state, handles {type:"token"} SSE events; progress-feed.tsx: tokenCharCount prop, "Writing notebook... (N chars)" display with scrollable container; 2/2 E2E pass (Playwright route mock); 77 unit pass; semgrep clean
 
 - [ ] Task 10: Full regression — run all v1 + v2 E2E and unit tests, update TASKS.md (P0)
   - Acceptance: `npx vitest run` passes all unit tests (≥ 36 total including new v2 tests);
