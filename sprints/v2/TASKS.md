@@ -47,12 +47,13 @@
     `paper2colab/tests/unit/error-sanitization.test.ts`
   - Completed: 2026-03-26 — Extracted classifyOpenAiError() to openai-client.ts; unclassified errors return generic message + log raw error via console.error; route.ts uses classifyOpenAiError(); catch-all in stream also sanitized; 11 new unit tests; 71/71 pass; semgrep clean
 
-- [ ] Task 6: Add per-IP rate limiting middleware (3 requests / 10 minutes) (P1)
+- [x] Task 6: Add per-IP rate limiting middleware (3 requests / 10 minutes) (P1)
   - Acceptance: `middleware.ts` intercepts `/api/generate` POST requests; a single IP making
     4 requests within 10 minutes gets a 429 response with `{ error: "Too many requests",
     retryAfter: N }` and a `Retry-After` header; the in-memory store uses a sliding window;
     Playwright test verifies the 4th request returns 429; middleware does not apply to other routes
   - Files: `paper2colab/middleware.ts`, `paper2colab/tests/e2e/task6v2-rate-limiting.spec.ts`
+  - Completed: 2026-03-26 — Created middleware.ts with in-memory sliding window (3 req/10 min per IP); reads x-forwarded-for; returns 429 + Retry-After header; updated task4-api-route.spec.ts to use valid API key format; 3/3 E2E pass; 71 unit pass; semgrep clean
 
 - [ ] Task 7: Default GitHub Gist to secret + add UI disclosure warning (P1)
   - Acceptance: `uploadToGist()` sets `public: false` (secret/unlisted gist); the main form

@@ -20,12 +20,12 @@ test.describe('Task 4 — /api/generate route (PDF extraction)', () => {
     const res = await request.post('/api/generate', { multipart: { pdf: { name: 'paper.pdf', mimeType: 'application/pdf', buffer: MINIMAL_PDF } } });
     expect(res.status()).toBe(400);
     const body = await res.json();
-    expect(body.error).toMatch(/apiKey/i);
+    expect(body.error).toMatch(/api key/i);
   });
 
   test('02 — returns 400 when pdf is missing', async ({ request }) => {
     const res = await request.post('/api/generate', {
-      multipart: { apiKey: 'sk-test-key-1234' },
+      multipart: { apiKey: 'sk-abcdefghij1234567890' },
     });
     expect(res.status()).toBe(400);
     const body = await res.json();
@@ -35,7 +35,7 @@ test.describe('Task 4 — /api/generate route (PDF extraction)', () => {
   test('03 — returns 200 SSE stream when valid PDF + apiKey provided', async ({ request }) => {
     const res = await request.post('/api/generate', {
       multipart: {
-        apiKey: 'sk-test-key-1234',
+        apiKey: 'sk-abcdefghij1234567890',
         pdf: { name: 'paper.pdf', mimeType: 'application/pdf', buffer: MINIMAL_PDF },
       },
     });
