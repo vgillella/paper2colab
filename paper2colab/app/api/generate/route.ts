@@ -12,6 +12,7 @@ export const maxDuration = 180;
 // ─────────────────────────────────────────────────────────────────────────────
 type SseEvent =
   | { type: 'progress'; message: string }
+  | { type: 'token'; delta: string }
   | { type: 'done'; notebookJson: string; filename: string; colabUrl: string | null; title: string }
   | { type: 'error'; message: string };
 
@@ -81,11 +82,16 @@ export async function POST(req: NextRequest) {
         // Step 2: Analyze paper
         progress('Analyzing paper structure and methodology...');
 
-        // Step 3: Call OpenAI
-        progress('Generating notebook with AI model (this takes 60–90 seconds)...');
+        // Step 3: Call OpenAI (streaming)
+        progress('Generating notebook with AI model (streaming tokens)...');
         let spec;
         try {
-          spec = await generateNotebook(apiKey, pdfText, progress);
+          spec = await generateNotebook(
+            apiKey,
+            pdfText,
+            progress,
+            (delta) => send({ type: 'token', delta })
+          );
         } catch (err: unknown) {
           send({ type: 'error', message: classifyOpenAiError(err) });
           controller.close();

@@ -30,39 +30,51 @@ export function classifyOpenAiError(err: unknown): string {
 }
 
 /**
- * Call the OpenAI API with the extracted PDF text and return a parsed NotebookSpec.
- * Uses the user-provided API key (never stored server-side).
+ * Call the OpenAI API with streaming enabled.
+ * Each token delta is forwarded via onToken(); the full JSON is accumulated
+ * server-side, parsed into a NotebookSpec, and returned.
+ *
+ * @param _client - Optional OpenAI client instance (for testing/DI). If omitted, one is created from apiKey.
  */
 export async function generateNotebook(
   apiKey: string,
   pdfText: string,
-  onProgress?: (msg: string) => void
+  onProgress?: (msg: string) => void,
+  onToken?: (delta: string) => void,
+  _client?: OpenAI
 ): Promise<NotebookSpec> {
-  const client = new OpenAI({ apiKey });
+  const client = _client ?? new OpenAI({ apiKey });
 
   onProgress?.('Sending paper to AI model...');
 
-  const response = await client.chat.completions.create({
+  const stream = await client.chat.completions.create({
     model: MODEL_ID,
     messages: [
       { role: 'system', content: buildSystemPrompt() },
       { role: 'user', content: buildUserMessage(pdfText) },
     ],
-    // Response format: ask for JSON explicitly
     response_format: { type: 'json_object' },
-    // High token output needed for detailed notebooks
     max_completion_tokens: 16000,
-    temperature: 0.3, // Low temperature for structured, accurate output
+    temperature: 0.3,
+    stream: true,
   });
+
+  let rawJson = '';
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta?.content;
+    if (delta != null) {
+      rawJson += delta;
+      onToken?.(delta);
+    }
+  }
 
   onProgress?.('AI response received — parsing notebook structure...');
 
-  const rawContent = response.choices[0]?.message?.content ?? '';
-  if (!rawContent) {
+  if (!rawJson) {
     throw new Error('OpenAI returned an empty response');
   }
 
-  const spec = parseNotebookResponse(rawContent);
+  const spec = parseNotebookResponse(rawJson);
   onProgress?.(`Notebook parsed: ${spec.cells.length} cells generated`);
 
   return spec;

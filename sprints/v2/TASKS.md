@@ -65,7 +65,7 @@
     `paper2colab/tests/unit/gist-uploader.test.ts`, `paper2colab/tests/e2e/task7v2-gist-disclosure.spec.ts`
   - Completed: 2026-03-26 — gist-uploader.ts: public:true → public:false; page.tsx: disclosure paragraph with data-testid="gist-disclosure" below submit button; unit test updated; 2/2 E2E pass; 71 unit pass; semgrep clean
 
-- [ ] Task 8: Stream OpenAI response token-by-token via SSE (P1)
+- [x] Task 8: Stream OpenAI response token-by-token via SSE (P1)
   - Acceptance: `generateNotebook()` uses `stream: true`; each token delta is forwarded as a
     new SSE event `{ type: "token", delta: "..." }` to the browser; the full response is
     accumulated server-side into `rawJson` and parsed into `NotebookSpec` after the stream ends;
@@ -73,6 +73,7 @@
     OpenAI stream and verify token events are emitted in order
   - Files: `paper2colab/lib/openai-client.ts`, `paper2colab/app/api/generate/route.ts`,
     `paper2colab/tests/unit/openai-streaming.test.ts`
+  - Completed: 2026-03-26 — generateNotebook() uses stream:true and async-iterates over chunks; each non-null delta forwarded via onToken(); rawJson accumulated then parsed; DI parameter _client added for testability; route.ts sends {type:"token",delta} SSE events; 6 new unit tests; 77/77 pass; semgrep clean
 
 - [ ] Task 9: Update ProgressFeed to display streaming token output (P1)
   - Acceptance: When `{ type: "token" }` SSE events arrive, the progress feed shows a live
