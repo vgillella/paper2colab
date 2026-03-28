@@ -1,6 +1,9 @@
 /** Maximum allowed PDF size: 20 MB */
 export const PDF_MAX_BYTES = 20 * 1024 * 1024;
 
+/** Maximum characters to extract from a PDF (320,000 chars ≈ ~230K tokens) */
+export const MAX_PDF_CHARS = 320_000;
+
 /**
  * Strip dangerous characters from extracted PDF text:
  * - C0 control chars: \x00–\x08, \x0B, \x0C, \x0E–\x1F (null, SOH…BS, VT, FF, SO…US)
@@ -13,6 +16,18 @@ export function sanitizePdfText(text: string): string {
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\u202E\uFFFE\uFFFF]/g, '')
     .replace(/=== PAPER TEXT START ===/g, '')
     .replace(/=== PAPER TEXT END ===/g, '');
+}
+
+/**
+ * Strip the References section and everything after it.
+ * Looks for a line that is exactly "References" or "REFERENCES".
+ */
+export function stripReferences(text: string): string {
+  const refMatch = text.match(/\n(References|REFERENCES)\n/);
+  if (refMatch && refMatch.index !== undefined) {
+    return text.slice(0, refMatch.index);
+  }
+  return text;
 }
 
 /** Regex for a valid OpenAI API key: sk- followed by 20–200 alphanumeric/dash/underscore chars */
@@ -51,17 +66,39 @@ export function validateGenerateRequest(
   return errors;
 }
 
+// Type for the PDFParse constructor (for DI in tests)
+type PDFParseConstructor = new (opts: { data: Uint8Array }) => { getText: () => Promise<{ text: string }> };
+
 /**
  * Extract plain text from a PDF buffer.
  * Lazy-loads pdf-parse to avoid pdfjs-dist DOM initialisation at module load time.
  * Throws if pdf-parse fails (corrupt/non-PDF file).
+ * Throws if the extracted text is too short (scanned/image-only PDFs).
+ * Strips the References section and truncates to MAX_PDF_CHARS.
+ *
+ * @param _PDFParse - Optional PDFParse constructor override (for testing/DI).
  */
-export async function extractTextFromPdf(buffer: Buffer): Promise<string> {
+export async function extractTextFromPdf(buffer: Buffer, _PDFParse?: PDFParseConstructor): Promise<string> {
   // pdf-parse v2 uses a class-based API: new PDFParse({ data }).getText()
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { PDFParse } = require('pdf-parse');
+  const PDFParse = _PDFParse ?? require('pdf-parse').PDFParse;
   const parser = new PDFParse({ data: new Uint8Array(buffer) });
   const result = await parser.getText();
   // TextResult has a .text string (concatenated all pages)
-  return result.text as string;
+  let text = result.text as string;
+
+  // Check for scanned/image-only PDFs
+  if (text.trim().length < 100) {
+    throw new Error('PDF appears to be scanned or image-only (no extractable text)');
+  }
+
+  // Strip references section
+  text = stripReferences(text);
+
+  // Truncate if too long
+  if (text.length > MAX_PDF_CHARS) {
+    text = text.slice(0, MAX_PDF_CHARS) + '\n[Paper truncated]';
+  }
+
+  return text;
 }

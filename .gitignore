@@ -3,3 +3,14 @@ node_modules/
 tests/screenshots/
 test-results/
 playwright-report/
+
+# Credentials — NEVER commit
+aws_cred.md
+*.pem
+*.p12
+*.pfx
+*.env
+.env*
+*_cred*
+*_key*
+*secret*

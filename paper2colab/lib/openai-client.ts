@@ -3,7 +3,7 @@ import { buildSystemPrompt, buildUserMessage, parseNotebookResponse, NotebookSpe
 
 // Model to use — configurable. gpt-4.5-preview is a high-capability reasoning model.
 // Update MODEL_ID to 'gpt-4.5-preview' or whichever model you have access to.
-export const MODEL_ID = process.env.OPENAI_MODEL ?? 'gpt-5.1';
+export const MODEL_ID = process.env.OPENAI_MODEL ?? 'gpt-4o';
 
 const GENERIC_ERROR = 'An unexpected error occurred. Please try again.';
 

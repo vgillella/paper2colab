@@ -3,5 +3,20 @@ node_modules/
 tests/screenshots/
 test-results/
 playwright-report/
+
+# Credentials — NEVER commit
+aws_cred.md
+*.pem
+*.p12
+*.pfx
 *.env
-.env.local
+.env*
+!.env.local.example
+*_cred*
+*_key*
+*secret*
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup

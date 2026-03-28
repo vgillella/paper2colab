@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { uploadToGist } from '@/lib/gist-uploader';
+import { notebookFilename } from '@/lib/notebook-assembler';
 
 const FAKE_NOTEBOOK = '{"nbformat":4,"cells":[]}';
 const FAKE_FILENAME = 'test_notebook.ipynb';
@@ -65,5 +66,50 @@ describe('uploadToGist()', () => {
     expect(body.public).toBe(false);
     expect(body.files).toHaveProperty(FAKE_FILENAME);
     expect(body.files[FAKE_FILENAME].content).toBe(FAKE_NOTEBOOK);
+  });
+
+  it('returns null when GitHub API returns 422 Unprocessable Entity', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce({
+      ok: false,
+      status: 422,
+      statusText: 'Unprocessable Entity',
+    }));
+
+    const result = await uploadToGist(FAKE_NOTEBOOK, FAKE_FILENAME);
+    expect(result).toBeNull();
+  });
+
+  it('returns null on network timeout (fetch rejects)', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValueOnce(new Error('The operation timed out')));
+
+    const result = await uploadToGist(FAKE_NOTEBOOK, FAKE_FILENAME);
+    expect(result).toBeNull();
+  });
+
+  it('returns null when GitHub API returns 500 Internal Server Error', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+    }));
+
+    const result = await uploadToGist(FAKE_NOTEBOOK, FAKE_FILENAME);
+    expect(result).toBeNull();
+  });
+});
+
+// ── notebookFilename() safety tests ─────────────────────────────────────────
+
+describe('notebookFilename()', () => {
+  it('sanitizes title with path traversal characters', () => {
+    const filename = notebookFilename('../../../etc/passwd');
+    expect(filename).not.toContain('..');
+    expect(filename).not.toContain('/');
+    expect(filename.endsWith('.ipynb')).toBe(true);
+  });
+
+  it('produces a safe filename for normal titles', () => {
+    const filename = notebookFilename('Attention Is All You Need');
+    expect(filename).toBe('attention_is_all_you_need.ipynb');
   });
 });

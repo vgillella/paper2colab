@@ -3,11 +3,13 @@
 import { useState, useRef, useCallback } from "react";
 import { ApiKeyInput } from "@/components/api-key-input";
 import { PdfUploadZone } from "@/components/pdf-upload-zone";
+import { ArxivUrlInput } from "@/components/arxiv-url-input";
 import { ProgressFeed, ProgressMessage } from "@/components/progress-feed";
 import { ResultActions } from "@/components/result-actions";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type AppState = "idle" | "processing" | "done" | "error";
+type Mode = "pdf" | "arxiv";
 
 interface Result {
   notebookJson: string;
@@ -30,8 +32,10 @@ function mkMsg(text: string, status: ProgressMessage["status"]): ProgressMessage
 
 // ── Main page ──────────────────────────────────────────────────────────────
 export default function Home() {
+  const [mode, setMode] = useState<Mode>("pdf");
   const [apiKey, setApiKey] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [arxivUrl, setArxivUrl] = useState("");
   const [appState, setAppState] = useState<AppState>("idle");
   const [messages, setMessages] = useState<ProgressMessage[]>([]);
   const [tokenCharCount, setTokenCharCount] = useState(0);
@@ -39,7 +43,10 @@ export default function Home() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const canSubmit = apiKey.trim().length > 0 && pdfFile !== null && appState === "idle";
+  const canSubmit =
+    mode === "pdf"
+      ? apiKey.trim().length > 0 && pdfFile !== null && appState === "idle"
+      : apiKey.trim().length > 0 && arxivUrl.trim().length > 0 && appState === "idle";
 
   const pushMessage = useCallback((text: string, status: ProgressMessage["status"] = "active") => {
     setMessages(prev => {
@@ -60,19 +67,30 @@ export default function Home() {
     setResult(null);
     setErrorMsg(null);
 
-    const formData = new FormData();
-    formData.append("apiKey", apiKey.trim());
-    formData.append("pdf", pdfFile!);
-
     const abort = new AbortController();
     abortRef.current = abort;
 
     try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        body: formData,
-        signal: abort.signal,
-      });
+      let response: Response;
+
+      if (mode === "pdf") {
+        const formData = new FormData();
+        formData.append("apiKey", apiKey.trim());
+        formData.append("pdf", pdfFile!);
+
+        response = await fetch("/api/generate", {
+          method: "POST",
+          body: formData,
+          signal: abort.signal,
+        });
+      } else {
+        response = await fetch("/api/generate-arxiv", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ arxivUrl: arxivUrl.trim(), apiKey: apiKey.trim() }),
+          signal: abort.signal,
+        });
+      }
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({ error: "Request failed" }));
@@ -134,7 +152,7 @@ export default function Home() {
       );
       setAppState("error");
     }
-  }, [apiKey, pdfFile, canSubmit, pushMessage]);
+  }, [apiKey, pdfFile, arxivUrl, mode, canSubmit, pushMessage]);
 
   const handleReset = () => {
     abortRef.current?.abort();
@@ -143,6 +161,7 @@ export default function Home() {
     setResult(null);
     setErrorMsg(null);
     setPdfFile(null);
+    setArxivUrl("");
   };
 
   const isProcessing = appState === "processing";
@@ -204,9 +223,46 @@ export default function Home() {
                 <div className="h-px flex-1 bg-border" />
               </div>
 
+              {/* Mode switcher */}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  data-testid="mode-pdf"
+                  onClick={() => setMode("pdf")}
+                  className={[
+                    "flex-1 py-2 px-4 font-mono text-xs tracking-widest uppercase",
+                    "border transition-all duration-150 outline-none",
+                    mode === "pdf"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-secondary text-muted-foreground hover:border-primary/40",
+                  ].join(" ")}
+                >
+                  PDF Upload
+                </button>
+                <button
+                  type="button"
+                  data-testid="mode-arxiv"
+                  onClick={() => setMode("arxiv")}
+                  className={[
+                    "flex-1 py-2 px-4 font-mono text-xs tracking-widest uppercase",
+                    "border transition-all duration-150 outline-none",
+                    mode === "arxiv"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-secondary text-muted-foreground hover:border-primary/40",
+                  ].join(" ")}
+                >
+                  arXiv URL
+                </button>
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-5">
                 <ApiKeyInput value={apiKey} onChange={setApiKey} />
-                <PdfUploadZone file={pdfFile} onFileChange={setPdfFile} />
+
+                {mode === "pdf" ? (
+                  <PdfUploadZone file={pdfFile} onFileChange={setPdfFile} />
+                ) : (
+                  <ArxivUrlInput value={arxivUrl} onChange={setArxivUrl} />
+                )}
 
                 <button
                   data-testid="submit-button"
