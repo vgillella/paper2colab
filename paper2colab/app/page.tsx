@@ -198,19 +198,26 @@ export default function Home() {
           </p>
         </div>
         <div className="ml-auto flex items-center gap-4">
-          {/* Vizuara logo */}
-          <div className="flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity">
-            <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Vizuara">
-              {/* Outer hexagon */}
-              <polygon points="18,2 32,10 32,26 18,34 4,26 4,10" stroke="currentColor" strokeWidth="2" fill="none" className="text-primary" />
-              {/* Inner triangle — data/chart motif */}
-              <polygon points="18,10 26,24 10,24" fill="currentColor" className="text-primary" opacity="0.85" />
-              {/* Center dot */}
-              <circle cx="18" cy="18" r="2.5" fill="currentColor" className="text-background" />
+          {/* VishnuAI logo */}
+          <div className="flex items-center gap-2 opacity-75 hover:opacity-100 transition-opacity">
+            <svg width="26" height="26" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="VishnuAI">
+              {/* Bold V shape */}
+              <polyline points="4,6 14,30 20,18 26,30 36,6" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary" />
+              {/* AI spark — three rays emanating from the V apex */}
+              <line x1="20" y1="18" x2="20" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-primary" opacity="0.6" />
+              <line x1="20" y1="18" x2="27" y2="13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-primary" opacity="0.6" />
+              <line x1="20" y1="18" x2="13" y2="13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-primary" opacity="0.6" />
+              {/* Dot at apex — the "AI brain" node */}
+              <circle cx="20" cy="18" r="2" fill="currentColor" className="text-primary" />
+              {/* Small accent dots at V ends */}
+              <circle cx="4" cy="6" r="1.5" fill="currentColor" className="text-primary" opacity="0.5" />
+              <circle cx="36" cy="6" r="1.5" fill="currentColor" className="text-primary" opacity="0.5" />
             </svg>
-            <span className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase">
-              Vizuara
-            </span>
+            <div className="flex flex-col leading-none">
+              <span className="text-[12px] font-mono font-bold tracking-tight text-foreground">
+                Vishnu<span className="text-primary">AI</span>
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
