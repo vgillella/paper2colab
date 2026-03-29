@@ -77,9 +77,10 @@ export async function POST(req: NextRequest) {
           pdfText = await extractTextFromPdf(pdfBuffer!);
           console.log(`[generate] Extracted ${pdfText.length} chars`);
         } catch (err) {
+          console.error('[generate] PDF extraction error:', err);
           const msg = err instanceof Error && err.message.includes('scanned')
             ? err.message
-            : 'Failed to parse PDF. Please upload a valid, text-based PDF.';
+            : `Failed to parse PDF. Please upload a valid, text-based PDF. (${err instanceof Error ? err.message : String(err)})`;
           send({ type: 'error', message: msg });
           closeController();
           return;
