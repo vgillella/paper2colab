@@ -197,14 +197,31 @@ export default function Home() {
             research paper → colab tutorial
           </p>
         </div>
-        <div className="ml-auto flex items-center gap-2">
-          <div className={[
-            "w-1.5 h-1.5 rounded-full",
-            isProcessing ? "bg-primary animate-pulse" : isDone ? "bg-green-500" : isError ? "bg-red-500" : "bg-muted-foreground/40",
-          ].join(" ")} />
-          <span className="text-[11px] font-mono text-muted-foreground">
-            {isProcessing ? "processing" : isDone ? "complete" : isError ? "error" : "ready"}
-          </span>
+        <div className="ml-auto flex items-center gap-4">
+          {/* Vizuara logo */}
+          <div className="flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity">
+            <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Vizuara">
+              {/* Outer hexagon */}
+              <polygon points="18,2 32,10 32,26 18,34 4,26 4,10" stroke="currentColor" strokeWidth="2" fill="none" className="text-primary" />
+              {/* Inner triangle — data/chart motif */}
+              <polygon points="18,10 26,24 10,24" fill="currentColor" className="text-primary" opacity="0.85" />
+              {/* Center dot */}
+              <circle cx="18" cy="18" r="2.5" fill="currentColor" className="text-background" />
+            </svg>
+            <span className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase">
+              Vizuara
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className={[
+              "w-1.5 h-1.5 rounded-full",
+              isProcessing ? "bg-primary animate-pulse" : isDone ? "bg-green-500" : isError ? "bg-red-500" : "bg-muted-foreground/40",
+            ].join(" ")} />
+            <span className="text-[11px] font-mono text-muted-foreground">
+              {isProcessing ? "processing" : isDone ? "complete" : isError ? "error" : "ready"}
+            </span>
+          </div>
         </div>
       </header>
 
