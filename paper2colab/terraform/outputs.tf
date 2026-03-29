@@ -1,5 +1,10 @@
+output "app_url" {
+  description = "Public HTTPS URL via CloudFront (use this)"
+  value       = "https://${aws_cloudfront_distribution.app.domain_name}"
+}
+
 output "alb_dns_name" {
-  description = "Public DNS name of the Application Load Balancer"
+  description = "ALB DNS (HTTP only — use app_url for HTTPS)"
   value       = "http://${aws_lb.main.dns_name}"
 }
 
@@ -16,4 +21,9 @@ output "ecs_cluster_name" {
 output "ecs_service_name" {
   description = "ECS service name (used in CD pipeline)"
   value       = aws_ecs_service.app.name
+}
+
+output "cloudfront_distribution_id" {
+  description = "CloudFront distribution ID (needed for cache invalidation)"
+  value       = aws_cloudfront_distribution.app.id
 }
