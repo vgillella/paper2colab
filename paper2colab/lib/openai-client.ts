@@ -2,8 +2,8 @@ import OpenAI from 'openai';
 import { buildSystemPrompt, buildUserMessage, parseNotebookResponse, NotebookSpec } from './prompt';
 
 // Model to use — override at runtime via OPENAI_MODEL env var (set in SSM Parameter Store).
-// Default: gpt-4.1 (high capability, fast responses).
-export const MODEL_ID = process.env.OPENAI_MODEL ?? 'gpt-4.1';
+// Default: gpt-5.4 (OpenAI flagship, released 2026-03-05).
+export const MODEL_ID = process.env.OPENAI_MODEL ?? 'gpt-5.4';
 
 const GENERIC_ERROR = 'An unexpected error occurred. Please try again.';
 
