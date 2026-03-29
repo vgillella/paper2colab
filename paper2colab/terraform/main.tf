@@ -14,6 +14,12 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
+# AWS-managed prefix list containing all CloudFront origin-facing IP ranges.
+# Using this means the ALB only accepts traffic from CloudFront — not the open internet.
+data "aws_ec2_managed_prefix_list" "cloudfront" {
+  name = "com.amazonaws.global.cloudfront.origin-facing"
+}
+
 # ── VPC ───────────────────────────────────────────────────────────────────────
 
 resource "aws_vpc" "main" {
@@ -73,14 +79,16 @@ resource "aws_route_table_association" "public_b" {
 
 resource "aws_security_group" "alb" {
   name        = "${var.app_name}-alb-sg"
-  description = "Allow HTTP inbound to ALB"
+  description = "Allow HTTP only from CloudFront origin-facing IPs"
   vpc_id      = aws_vpc.main.id
 
+  # Only CloudFront can reach the ALB — direct internet access is blocked.
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    prefix_list_ids = [data.aws_ec2_managed_prefix_list.cloudfront.id]
+    description     = "CloudFront origin-facing IPs only"
   }
 
   egress {
