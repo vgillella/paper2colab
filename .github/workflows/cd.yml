@@ -1,0 +1,65 @@
+name: CD — Build, Push ECR, Deploy ECS
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+defaults:
+  run:
+    working-directory: paper2colab
+
+jobs:
+  deploy:
+    name: Build & Deploy to ECS Fargate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          ECR_REPO: ${{ secrets.ECR_REPO_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPO:latest \
+                       -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPO:latest
+          docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+
+      - name: Force new ECS deployment
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECS_CLUSTER: paper2colab-cluster
+          ECS_SERVICE: paper2colab-service
+        run: |
+          aws ecs update-service \
+            --region $AWS_REGION \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment
+
+      - name: Wait for service to stabilise
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECS_CLUSTER: paper2colab-cluster
+          ECS_SERVICE: paper2colab-service
+        run: |
+          aws ecs wait services-stable \
+            --region $AWS_REGION \
+            --cluster $ECS_CLUSTER \
+            --services $ECS_SERVICE
