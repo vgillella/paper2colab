@@ -39,3 +39,9 @@ variable "openai_api_key_ssm_path" {
   type        = string
   default     = "/paper2colab/OPENAI_API_KEY"
 }
+
+variable "openai_model_ssm_path" {
+  description = "SSM Parameter Store path for the OpenAI model name (String)"
+  type        = string
+  default     = "/paper2colab/OPENAI_MODEL"
+}

@@ -170,7 +170,10 @@ resource "aws_iam_role_policy" "ecs_task_ssm" {
     Statement = [{
       Effect   = "Allow"
       Action   = ["ssm:GetParameter", "ssm:GetParameters"]
-      Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter${var.openai_api_key_ssm_path}"
+      Resource = [
+        "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter${var.openai_api_key_ssm_path}",
+        "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter${var.openai_model_ssm_path}"
+      ]
     }]
   })
 }
@@ -207,10 +210,16 @@ resource "aws_ecs_task_definition" "app" {
       protocol      = "tcp"
     }]
 
-    secrets = [{
-      name      = "OPENAI_API_KEY"
-      valueFrom = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter${var.openai_api_key_ssm_path}"
-    }]
+    secrets = [
+      {
+        name      = "OPENAI_API_KEY"
+        valueFrom = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter${var.openai_api_key_ssm_path}"
+      },
+      {
+        name      = "OPENAI_MODEL"
+        valueFrom = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter${var.openai_model_ssm_path}"
+      }
+    ]
 
     logConfiguration = {
       logDriver = "awslogs"

@@ -1,9 +1,9 @@
 import OpenAI from 'openai';
 import { buildSystemPrompt, buildUserMessage, parseNotebookResponse, NotebookSpec } from './prompt';
 
-// Model to use — configurable. gpt-4.5-preview is a high-capability reasoning model.
-// Update MODEL_ID to 'gpt-4.5-preview' or whichever model you have access to.
-export const MODEL_ID = process.env.OPENAI_MODEL ?? 'gpt-4o';
+// Model to use — override at runtime via OPENAI_MODEL env var (set in SSM Parameter Store).
+// Default: gpt-5.4 (OpenAI flagship, released 2026-03-05).
+export const MODEL_ID = process.env.OPENAI_MODEL ?? 'gpt-5.4';
 
 const GENERIC_ERROR = 'An unexpected error occurred. Please try again.';
 
